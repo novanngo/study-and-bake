@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Study Bakery</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 32px 16px;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #F1E7D8;
+    font-family: 'Nunito', sans-serif;
+  }
+  .sb-root {
+    --cream: #FBF3E7;
+    --brown: #6B4A34;
+    --brown-soft: #8B6B52;
+    width: 100%;
+    max-width: 620px;
+    background: linear-gradient(160deg, var(--bg1), var(--bg2));
+    border-radius: 20px;
+    padding: 28px 24px 32px;
+    color: var(--brown);
+    transition: background 700ms ease;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+  }
+  .sb-title { font-family: 'Fredoka', sans-serif; font-weight: 600; }
+  .sb-topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 22px;
+  }
+  .sb-wordmark { font-size: 22px; display: flex; align-items: center; gap: 8px; }
+  .sb-cafes { display: flex; gap: 6px; background: rgba(255,255,255,0.5); padding: 5px; border-radius: 999px; flex-wrap: wrap; }
+  .sb-cafe-btn {
+    border: none; background: transparent; padding: 7px 13px; border-radius: 999px;
+    font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 13px; cursor: pointer;
+    color: var(--brown-soft); transition: all 200ms ease; display: flex; align-items: center; gap: 5px;
+    white-space: nowrap;
+  }
+  .sb-cafe-btn.active { background: var(--accent); color: white; box-shadow: 0 2px 6px rgba(0,0,0,0.12); }
+  .sb-cafe-btn:not(.active):hover { background: rgba(255,255,255,0.7); }
+  .sb-stage { background: rgba(255,255,255,0.55); border-radius: 18px; padding: 26px; backdrop-filter: blur(2px); position: relative; }
+  .sb-panel-title { font-size: 18px; margin: 0 0 4px; }
+  .sb-panel-sub { font-size: 13px; color: var(--brown-soft); margin: 0 0 18px; }
+  .sb-recipe-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; margin-bottom: 22px; }
+  .sb-recipe-card {
+    border: 2px solid transparent; background: white; border-radius: 14px; padding: 14px 8px;
+    text-align: center; cursor: pointer; transition: all 180ms ease; font-family: 'Nunito', sans-serif;
+  }
+  .sb-recipe-card:hover { transform: translateY(-2px); }
+  .sb-recipe-card.active { border-color: var(--accent); box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
+  .sb-recipe-icon { font-size: 30px; display: block; margin-bottom: 6px; }
+  .sb-recipe-name { font-size: 12.5px; font-weight: 700; color: var(--brown); display: block; }
+  .sb-recipe-rarity { font-size: 10px; color: var(--brown-soft); text-transform: uppercase; letter-spacing: 0.05em; }
+  .sb-durations { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+  .sb-duration-btn {
+    border: 2px solid rgba(0,0,0,0.06); background: white; padding: 9px 14px; border-radius: 12px;
+    font-weight: 700; font-size: 13px; cursor: pointer; color: var(--brown-soft);
+  }
+  .sb-duration-btn.active { border-color: var(--accent); color: var(--accent-dark); background: color-mix(in srgb, var(--accent) 12%, white); }
+  .sb-start-btn {
+    border: none; background: var(--accent); color: white; font-family: 'Fredoka', sans-serif;
+    font-weight: 600; font-size: 15px; padding: 12px 26px; border-radius: 999px; cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: transform 150ms ease;
+  }
+  .sb-start-btn:hover { transform: scale(1.03); }
+  .sb-start-btn:active { transform: scale(0.98); }
+
+  .sb-oven-wrap { display: flex; flex-direction: column; align-items: center; padding: 8px 0 6px; }
+  .sb-oven { position: relative; width: 220px; height: 190px; background: linear-gradient(180deg, #A9714B, #7C4E30); border-radius: 26px 26px 18px 18px; box-shadow: 0 10px 24px rgba(0,0,0,0.18); }
+  .sb-oven-knob { position: absolute; top: 14px; right: 18px; width: 14px; height: 14px; border-radius: 50%; background: #F1D9B8; box-shadow: inset 0 0 0 2px rgba(0,0,0,0.15); }
+  .sb-oven-window {
+    position: absolute; top: 38px; left: 50%; transform: translateX(-50%); width: 140px; height: 110px;
+    border-radius: 50%; background: radial-gradient(circle at 50% 60%, #3B2417, #1E140D);
+    box-shadow: inset 0 0 0 8px #5B3A24, inset 0 0 22px rgba(0,0,0,0.6); overflow: hidden;
+  }
+  .sb-oven-glow { position: absolute; inset: 8px; border-radius: 50%; background: radial-gradient(circle at 50% 65%, rgba(255,170,80,var(--glow,0.15)), transparent 70%); transition: background 400ms ease; }
+  .sb-baking-icon { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%) scale(var(--bake-scale, 0.9)); font-size: 44px; filter: brightness(0.95) saturate(1.05); transition: transform 600ms ease; }
+  .sb-oven-legs { position: absolute; bottom: -10px; left: 24px; right: 24px; display: flex; justify-content: space-between; }
+  .sb-oven-leg { width: 14px; height: 14px; border-radius: 4px; background: #5B3A24; }
+  .sb-steam { position: absolute; bottom: 92%; width: 14px; height: 14px; border-radius: 50%; background: rgba(255,255,255,0.65); opacity: 0; animation: sb-rise 3.4s ease-in infinite; }
+  @keyframes sb-rise {
+    0% { opacity: 0; transform: translateY(0) scale(0.6); }
+    15% { opacity: 0.7; }
+    85% { opacity: 0.15; }
+    100% { opacity: 0; transform: translateY(-90px) scale(1.3); }
+  }
+  .sb-progress-track { width: 260px; height: 10px; border-radius: 999px; background: rgba(0,0,0,0.08); margin: 22px 0 6px; overflow: hidden; }
+  .sb-progress-fill { height: 100%; background: var(--accent); border-radius: 999px; transition: width 1s linear; }
+  .sb-timer-label { font-family: 'Fredoka', sans-serif; font-size: 22px; margin-top: 6px; }
+  .sb-bake-sub { font-size: 12.5px; color: var(--brown-soft); margin-bottom: 4px; }
+  .sb-bake-controls { display: flex; gap: 10px; margin-top: 20px; }
+  .sb-ctrl-btn { border: 2px solid rgba(0,0,0,0.08); background: white; padding: 9px 18px; border-radius: 999px; font-weight: 700; font-size: 13px; cursor: pointer; color: var(--brown); }
+  .sb-ctrl-btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
+
+  .sb-done-wrap { display: flex; flex-direction: column; align-items: center; padding: 10px 0 4px; position: relative; }
+  .sb-done-icon { font-size: 64px; animation: sb-pop 700ms ease; }
+  @keyframes sb-pop {
+    0% { transform: scale(0.3) rotate(-8deg); opacity: 0; }
+    60% { transform: scale(1.12) rotate(4deg); opacity: 1; }
+    100% { transform: scale(1) rotate(0); }
+  }
+  .sb-confetti { position: absolute; top: -10px; font-size: 14px; animation: sb-fall linear forwards; }
+  @keyframes sb-fall { to { transform: translateY(220px) rotate(200deg); opacity: 0; } }
+  .sb-done-title { font-size: 20px; margin: 12px 0 2px; }
+  .sb-done-sub { font-size: 13px; color: var(--brown-soft); margin-bottom: 18px; }
+
+  .sb-footer { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-top: 20px; flex-wrap: wrap; }
+  .sb-shelf-label { font-size: 12px; font-weight: 700; color: var(--brown-soft); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+  .sb-shelf { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; max-width: 420px; }
+  .sb-shelf-item { flex: 0 0 auto; width: 40px; height: 40px; border-radius: 10px; background: white; display: flex; align-items: center; justify-content: center; font-size: 19px; box-shadow: 0 2px 5px rgba(0,0,0,0.08); }
+  .sb-shelf-empty { font-size: 12.5px; color: var(--brown-soft); }
+  .sb-level { text-align: right; min-width: 150px; }
+  .sb-level-label { font-size: 12px; font-weight: 700; color: var(--brown-soft); }
+  .sb-level-bar { width: 150px; height: 8px; border-radius: 999px; background: rgba(0,0,0,0.08); margin-top: 6px; overflow: hidden; margin-left: auto; }
+  .sb-level-fill { height: 100%; background: var(--accent); border-radius: 999px; transition: width 500ms ease; }
+</style>
+</head>
+<body>
+
+<div class="sb-root" id="sbRoot">
+  <div class="sb-topbar">
+    <div class="sb-wordmark sb-title">🧁 Study Bakery</div>
+    <div class="sb-cafes" id="sbCafes"></div>
+  </div>
+  <div class="sb-stage" id="sbStage"></div>
+  <div class="sb-footer">
+    <div>
+      <div class="sb-shelf-label" id="sbShelfLabel">Your collection (0)</div>
+      <div class="sb-shelf" id="sbShelf"></div>
+    </div>
+    <div class="sb-level">
+      <div class="sb-level-label" id="sbLevelLabel">Level 1 · 0 XP</div>
+      <div class="sb-level-bar"><div class="sb-level-fill" id="sbLevelFill" style="width:0%"></div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const CAFES = [
+  { id: "paris", flag: "🇫🇷", name: "Paris", bg1: "#FBF2E6", bg2: "#F1D9C4", accent: "#C97B54", accentDark: "#8A4E2E",
+    ambience: "Soft accordion, rain on cobblestone",
+    recipes: [
+      { id: "croissant", name: "Croissant", icon: "🥐", rarity: "Common" },
+      { id: "baguette", name: "Baguette", icon: "🥖", rarity: "Common" },
+      { id: "painchoc", name: "Pain au Chocolat", icon: "🍫", rarity: "Uncommon" },
+      { id: "tarte", name: "Tarte aux Fruits", icon: "🥧", rarity: "Rare" },
+    ]},
+  { id: "japan", flag: "🇯🇵", name: "Japan", bg1: "#F2F1E6", bg2: "#D9E1CE", accent: "#748C67", accentDark: "#465A3C",
+    ambience: "Lo-fi shop tape, rain on paper lanterns",
+    recipes: [
+      { id: "matcha", name: "Matcha Cake", icon: "🍵", rarity: "Uncommon" },
+      { id: "mochi", name: "Mochi", icon: "🍡", rarity: "Common" },
+      { id: "onigiri", name: "Onigiri", icon: "🍙", rarity: "Common" },
+      { id: "taiyaki", name: "Taiyaki", icon: "🐟", rarity: "Rare" },
+    ]},
+  { id: "vietnam", flag: "🇻🇳", name: "Vietnam", bg1: "#FCEDE7", bg2: "#F3CFC2", accent: "#D9765C", accentDark: "#93412C",
+    ambience: "Scooters outside, warm café chatter",
+    recipes: [
+      { id: "banhmi", name: "Bánh Mì", icon: "🥪", rarity: "Common" },
+      { id: "eggcoffee", name: "Egg Coffee", icon: "☕", rarity: "Uncommon" },
+      { id: "eggtart", name: "Egg Tart", icon: "🥮", rarity: "Uncommon" },
+      { id: "springroll", name: "Spring Rolls", icon: "🌯", rarity: "Rare" },
+    ]},
+  { id: "mexico", flag: "🇲🇽", name: "Mexico", bg1: "#FDF1DD", bg2: "#F3D49B", accent: "#D98A33", accentDark: "#8F571A",
+    ambience: "Acoustic guitar, golden hour breeze",
+    recipes: [
+      { id: "pandulce", name: "Pan Dulce", icon: "🍞", rarity: "Common" },
+      { id: "churro", name: "Churros", icon: "🥨", rarity: "Common" },
+      { id: "flan", name: "Flan", icon: "🍮", rarity: "Uncommon" },
+      { id: "cake", name: "Tres Leches", icon: "🎂", rarity: "Rare" },
+    ]},
+];
+const DURATIONS = [15, 25, 45, 60, 90, 120];
+
+let state = {
+  cafeId: "paris",
+  screen: "select", // select | baking | done
+  recipeId: null,
+  duration: 25,
+  remaining: 0,
+  paused: false,
+  collection: [],
+  xp: 0,
+  justFinished: null,
+};
+let timerHandle = null;
+
+function loadSaved() {
+  try {
+    const raw = localStorage.getItem("study-bakery-collection");
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      state.collection = parsed.collection || [];
+      state.xp = parsed.xp || 0;
+    }
+  } catch (e) {}
+}
+function persist() {
+  try {
+    localStorage.setItem("study-bakery-collection", JSON.stringify({ collection: state.collection, xp: state.xp }));
+  } catch (e) {}
+}
+
+function getCafe() { return CAFES.find(c => c.id === state.cafeId); }
+function getRecipe() {
+  const cafe = getCafe();
+  return cafe.recipes.find(r => r.id === state.recipeId) || cafe.recipes[0];
+}
+
+function setCafe(id) {
+  state.cafeId = id;
+  state.recipeId = null;
+  render();
+}
+function setRecipe(id) { state.recipeId = id; render(); }
+function setDuration(d) { state.duration = d; render(); }
+
+function startBake() {
+  state.remaining = state.duration;
+  state.paused = false;
+  state.screen = "baking";
+  render();
+  runTimer();
+}
+function runTimer() {
+  clearInterval(timerHandle);
+  timerHandle = setInterval(() => {
+    if (state.paused) return;
+    state.remaining -= 1;
+    if (state.remaining <= 0) {
+      clearInterval(timerHandle);
+      finishBake();
+      return;
+    }
+    render();
+  }, 1000);
+}
+function togglePause() { state.paused = !state.paused; render(); }
+function cancelBake() {
+  clearInterval(timerHandle);
+  state.paused = false;
+  state.screen = "select";
+  render();
+}
+function finishBake() {
+  const cafe = getCafe();
+  const recipe = getRecipe();
+  const entry = {
+    id: recipe.id + "-" + Date.now(),
+    name: recipe.name,
+    icon: recipe.icon,
+    cafe: cafe.name,
+  };
+  state.collection = [entry, ...state.collection].slice(0, 24);
+  state.xp += 10;
+  persist();
+  state.justFinished = entry;
+  state.screen = "done";
+  render();
+}
+function bakeAgain() {
+  state.justFinished = null;
+  state.screen = "select";
+  render();
+}
+
+function renderCafeTabs() {
+  const el = document.getElementById("sbCafes");
+  el.innerHTML = CAFES.map(c => `
+    <button class="sb-cafe-btn ${c.id === state.cafeId ? "active" : ""}" data-cafe="${c.id}">
+      <span>${c.flag}</span><span>${c.name}</span>
+    </button>
+  `).join("");
+  el.querySelectorAll("button").forEach(btn => {
+    btn.addEventListener("click", () => setCafe(btn.dataset.cafe));
+  });
+}
+
+function renderStage() {
+  const cafe = getCafe();
+  const recipe = getRecipe();
+  const el = document.getElementById("sbStage");
+
+  if (state.screen === "select") {
+    el.innerHTML = `
+      <p class="sb-panel-title sb-title">What should we bake?</p>
+      <p class="sb-panel-sub">${cafe.name} café · ${cafe.ambience}</p>
+      <div class="sb-recipe-grid">
+        ${cafe.recipes.map(r => `
+          <div class="sb-recipe-card ${r.id === recipe.id ? "active" : ""}" data-recipe="${r.id}">
+            <span class="sb-recipe-icon">${r.icon}</span>
+            <span class="sb-recipe-name">${r.name}</span>
+            <div class="sb-recipe-rarity">${r.rarity}</div>
+          </div>
+        `).join("")}
+      </div>
+      <p class="sb-panel-sub" style="margin-bottom:8px;">Study duration (demo runs at 1 second per minute)</p>
+      <div class="sb-durations">
+        ${DURATIONS.map(d => `<button class="sb-duration-btn ${d === state.duration ? "active" : ""}" data-duration="${d}">${d} min</button>`).join("")}
+      </div>
+      <button class="sb-start-btn" id="sbStart">Start baking →</button>
+    `;
+    el.querySelectorAll("[data-recipe]").forEach(card => card.addEventListener("click", () => setRecipe(card.dataset.recipe)));
+    el.querySelectorAll("[data-duration]").forEach(btn => btn.addEventListener("click", () => setDuration(parseInt(btn.dataset.duration, 10))));
+    document.getElementById("sbStart").addEventListener("click", startBake);
+  }
+
+  if (state.screen === "baking") {
+    const total = state.duration;
+    const progress = total ? 1 - state.remaining / total : 0;
+    el.innerHTML = `
+      <div class="sb-oven-wrap">
+        <p class="sb-panel-title sb-title" style="margin-bottom:2px;">Baking ${recipe.name}</p>
+        <p class="sb-bake-sub">${cafe.flag} ${cafe.name} café</p>
+        <div class="sb-oven">
+          <div class="sb-oven-knob"></div>
+          <div class="sb-oven-window">
+            <div class="sb-oven-glow" style="--glow:${0.15 + progress * 0.55}"></div>
+            <div class="sb-baking-icon" style="--bake-scale:${0.85 + progress * 0.3}">${recipe.icon}</div>
+            ${!state.paused ? [0,1,2].map(i => `<div class="sb-steam" style="left:${34 + i*22}%; animation-delay:${i*1.1}s;"></div>`).join("") : ""}
+          </div>
+          <div class="sb-oven-legs"><div class="sb-oven-leg"></div><div class="sb-oven-leg"></div></div>
+        </div>
+        <div class="sb-progress-track"><div class="sb-progress-fill" style="width:${Math.round(progress*100)}%"></div></div>
+        <div class="sb-timer-label sb-title">${state.remaining}s left ${state.paused ? "· paused" : ""}</div>
+        <div class="sb-bake-controls">
+          <button class="sb-ctrl-btn" id="sbCancel">Cancel</button>
+          <button class="sb-ctrl-btn primary" id="sbPause">${state.paused ? "Resume" : "Pause"}</button>
+        </div>
+      </div>
+    `;
+    document.getElementById("sbCancel").addEventListener("click", cancelBake);
+    document.getElementById("sbPause").addEventListener("click", togglePause);
+  }
+
+  if (state.screen === "done" && state.justFinished) {
+    const jf = state.justFinished;
+    const confetti = ["✨","🎉","🌸","⭐"];
+    el.innerHTML = `
+      <div class="sb-done-wrap">
+        ${[...Array(10)].map((_, i) => `
+          <span class="sb-confetti" style="left:${8 + i*9}%; animation-duration:${1.4 + (i%4)*0.3}s; animation-delay:${i*0.05}s;">${confetti[i%4]}</span>
+        `).join("")}
+        <div class="sb-done-icon">${jf.icon}</div>
+        <p class="sb-done-title sb-title">${jf.name} is ready!</p>
+        <p class="sb-done-sub">+10 XP · added to your recipe collection</p>
+        <button class="sb-start-btn" id="sbAgain">Bake something else</button>
+      </div>
+    `;
+    document.getElementById("sbAgain").addEventListener("click", bakeAgain);
+  }
+}
+
+function renderFooter() {
+  document.getElementById("sbShelfLabel").textContent = `Your collection (${state.collection.length})`;
+  const shelf = document.getElementById("sbShelf");
+  if (state.collection.length === 0) {
+    shelf.innerHTML = `<span class="sb-shelf-empty">Nothing baked yet — finish a session to fill the shelf.</span>`;
+  } else {
+    shelf.innerHTML = state.collection.map(item => `<div class="sb-shelf-item" title="${item.name} · ${item.cafe}">${item.icon}</div>`).join("");
+  }
+  const level = Math.floor(state.xp / 50) + 1;
+  const xpIntoLevel = state.xp % 50;
+  document.getElementById("sbLevelLabel").textContent = `Level ${level} · ${state.xp} XP`;
+  document.getElementById("sbLevelFill").style.width = (xpIntoLevel / 50 * 100) + "%";
+}
+
+function render() {
+  const cafe = getCafe();
+  const root = document.getElementById("sbRoot");
+  root.style.setProperty("--bg1", cafe.bg1);
+  root.style.setProperty("--bg2", cafe.bg2);
+  root.style.setProperty("--accent", cafe.accent);
+  root.style.setProperty("--accent-dark", cafe.accentDark);
+  renderCafeTabs();
+  renderStage();
+  renderFooter();
+}
+
+loadSaved();
+render();
+</script>
+
+</body>
+</html>
